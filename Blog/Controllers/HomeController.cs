@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Web.Mvc;
 using Blog.Data;
 using Blog.Domain;
@@ -6,7 +7,20 @@ using Blog.Models;
 
 namespace Blog.Controllers {
 
-    public class HomeController : Controller {
+    public class HomeController : Controller
+    {
+        private BlogContext _db;
+        private BlogViewModel _blogViewModel;
+
+        public HomeController()
+        {
+            _db = new BlogContext();
+        }
+
+        public HomeController(BlogContext blogContext)
+        {
+            _db = blogContext;
+        }
 
         public ActionResult Index() {
 
@@ -34,10 +48,10 @@ namespace Blog.Controllers {
                     PostBody = blogViewModel.PostBody
                 };
 
-                var newPostDbContext = new BlogContext();
+                _db = new BlogContext();
                 
-                newPostDbContext.Blogs.Add(blog);
-                newPostDbContext.SaveChanges();
+                _db.Blogs.Add(blog);
+                _db.SaveChanges();
 
                 return Redirect("Index");
             }

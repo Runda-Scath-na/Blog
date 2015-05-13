@@ -1,16 +1,28 @@
 ﻿using System;
+using System.Data.Entity;
 using System.Threading;
 using System.Web.Mvc;
 using Blog.Controllers;
+using Blog.Data;
+using Blog.Domain;
 using Blog.Models;
+using Moq;
 using NUnit.Framework;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Blog.Tests.Controllers {
+
     [TestFixture]
     public class HomeControllerTest
     {
+        private Mock<DbSet<Blogs>> _mockBlogs;
         private BlogViewModel _blogViewModel = new BlogViewModel();
+
+        [SetUp]
+        public void SetUp() {
+
+            _mockBlogs = new Mock<DbSet<Blogs>>();
+        }
 
         [Test]
         public void Index() {
@@ -22,6 +34,16 @@ namespace Blog.Tests.Controllers {
 
             // Assert
             Assert.IsNotNull(result);
+        }
+
+        [Test]
+        public void IndexPageDisplayPosts() {
+
+
+            var controller = GetMockedController(_mockBlogs);
+            var result = controller.Index();
+
+            Assert.AreEqual("",result);
         }
 
         [Test]
@@ -39,8 +61,9 @@ namespace Blog.Tests.Controllers {
         [Test]
         public void NewPostFailed(){
 
-            var controller = new HomeController();
-            controller.ModelState.AddModelError("Key", "Value");
+            var controller = GetMockedController(_mockBlogs);
+            HomeControllerTest.PostCreate(new BlogViewModel());
+            controller.ViewData.ModelState.AddModelError("Key", "Value");
             var result = controller.NewPost(_blogViewModel) as ViewResult;
 
             Assert.AreEqual("NewPost", result.ViewName);
@@ -86,5 +109,7 @@ namespace Blog.Tests.Controllers {
             // Assert
             Assert.IsNotNull(result);
         }
+
+        
     }
 }
